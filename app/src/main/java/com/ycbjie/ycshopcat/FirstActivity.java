@@ -1,32 +1,23 @@
 package com.ycbjie.ycshopcat;
 
 import android.annotation.SuppressLint;
-import android.os.Handler;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
-import android.view.MotionEvent;
+import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.ViewTreeObserver;
 import android.widget.AbsListView;
 import android.widget.CheckBox;
 import android.widget.ExpandableListView;
 import android.widget.LinearLayout;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.ycbjie.ycshopcat.bean.GoodsInfo;
 import com.ycbjie.ycshopcat.bean.ShopBean;
 import com.ycbjie.ycshopcat.bean.StoreInfo;
-import com.ycbjie.ycshopcatlib.VerticalRecyclerView;
-
-import org.yczbj.ycrefreshviewlib.adapter.RecyclerArrayAdapter;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -63,7 +54,7 @@ public class FirstActivity extends AppCompatActivity implements View.OnClickList
      * false就是编辑，true就是完成
      */
     private boolean flag = false;
-    private ShopCatAdapter adapter;
+    private ShopCat1Adapter adapter;
     private ShopMoreAdapter moreAdapter;
     private List<ShopBean> shopBeans;
 
@@ -114,7 +105,7 @@ public class FirstActivity extends AppCompatActivity implements View.OnClickList
         groups = new ArrayList<>();
         childs = new HashMap<>();
         for (int i = 0; i < 5; i++) {
-            groups.add(new StoreInfo(i + "", "杨充：" + (i + 1) + "号当铺"));
+            groups.add(new StoreInfo(i + "", "杨充：" + (i + 1) + "号当铺",true));
             List<GoodsInfo> goods = new ArrayList<>();
             for (int j = 0; j <= i; j++) {
                 int[] img = {R.drawable.bg_autumn_tree_min,
@@ -195,9 +186,9 @@ public class FirstActivity extends AppCompatActivity implements View.OnClickList
 
 
     private void initListView() {
-        adapter = new ShopCatAdapter(groups, childs, this);
+        adapter = new ShopCat1Adapter(groups, childs, this);
         //关键步骤1：设置复选框的接口
-        adapter.setCheckInterface(new ShopCatAdapter.CheckInterface() {
+        adapter.setCheckInterface(new ShopCat1Adapter.CheckInterface() {
             /**
              * @param groupPosition 组元素的位置
              * @param isChecked     组元素的选中与否
@@ -219,20 +210,40 @@ public class FirstActivity extends AppCompatActivity implements View.OnClickList
             }
         });
         //关键步骤2:设置增删减的接口
-        adapter.setModifyCountInterface(new ShopCatAdapter.ModifyCountInterface() {
+        adapter.setModifyCountInterface(new ShopCat1Adapter.ModifyCountInterface() {
             @Override
             public void doIncrease(int groupPosition, int childPosition, View showCountView, boolean isChecked) {
-
+                GoodsInfo good = (GoodsInfo) adapter.getChild(groupPosition, childPosition);
+                int count = good.getCount();
+                count++;
+                good.setCount(count);
+                ((TextView) showCountView).setText(String.valueOf(count));
+                adapter.notifyDataSetChanged();
+                calulate();
             }
 
             @Override
             public void doDecrease(int groupPosition, int childPosition, View showCountView, boolean isChecked) {
-
+                GoodsInfo good = (GoodsInfo) adapter.getChild(groupPosition, childPosition);
+                int count = good.getCount();
+                if (count == 1) {
+                    return;
+                }
+                count--;
+                good.setCount(count);
+                ((TextView) showCountView).setText("" + count);
+                adapter.notifyDataSetChanged();
+                calulate();
             }
 
             @Override
             public void doUpdate(int groupPosition, int childPosition, View showCountView, boolean isChecked) {
-
+                GoodsInfo good = (GoodsInfo) adapter.getChild(groupPosition, childPosition);
+                int count = good.getCount();
+                Log.i("进行更新数据，数量", count + "");
+                ((TextView) showCountView).setText(String.valueOf(count));
+                adapter.notifyDataSetChanged();
+                calulate();
             }
 
             @Override
@@ -241,7 +252,7 @@ public class FirstActivity extends AppCompatActivity implements View.OnClickList
             }
         });
         //关键步骤3:监听组列表的编辑状态
-        adapter.setGroupEditorListener(new ShopCatAdapter.GroupEditorListener() {
+        adapter.setGroupEditorListener(new ShopCat1Adapter.GroupEditorListener() {
             @Override
             public void groupEditor(int groupPosition) {
 

@@ -14,7 +14,6 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-
 import com.ycbjie.ycshopcat.bean.GoodsInfo;
 import com.ycbjie.ycshopcat.bean.StoreInfo;
 
@@ -22,11 +21,10 @@ import java.util.List;
 import java.util.Map;
 
 
-
 /**
  * 购物车适配器
  */
-public class ShopCatAdapter extends BaseExpandableListAdapter {
+public class ShopCat4Adapter extends BaseExpandableListAdapter {
 
     private List<StoreInfo> groups;
     //这个String对应着StoreInfo的Id，也就是店铺的Id
@@ -41,7 +39,7 @@ public class ShopCatAdapter extends BaseExpandableListAdapter {
     private boolean flag = true;
 
 
-    ShopCatAdapter(List<StoreInfo> groups, Map<String, List<GoodsInfo>> children, Context mContext) {
+    ShopCat4Adapter(List<StoreInfo> groups, Map<String, List<GoodsInfo>> children, Context mContext) {
         this.groups = groups;
         this.children = children;
         this.mContext = mContext;
@@ -108,12 +106,6 @@ public class ShopCatAdapter extends BaseExpandableListAdapter {
         return false;
     }
 
-
-    @Override
-    public boolean isChildSelectable(int groupPosition, int childPosition) {
-        return false;
-    }
-
     @Override
     public View getGroupView(final int groupPosition, boolean isExpanded, View convertView, ViewGroup parent) {
         final GroupViewHolder groupViewHolder;
@@ -124,42 +116,54 @@ public class ShopCatAdapter extends BaseExpandableListAdapter {
         } else {
             groupViewHolder = (GroupViewHolder) convertView.getTag();
         }
-        final StoreInfo group = (StoreInfo) getGroup(groupPosition);
-        groupViewHolder.storeName.setText(group.getName());
-        groupViewHolder.storeCheckBox.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                group.setChoosed(((CheckBox) v).isChecked());
-                checkInterface.checkGroup(groupPosition, ((CheckBox) v).isChecked());
+
+        if(!groups.get(groupPosition).isLose()){
+            final StoreInfo  group = (StoreInfo) getGroup(groupPosition);
+            groupViewHolder.storeName.setText(group.getName());
+
+            groupViewHolder.storeCheckBox.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    group.setChoosed(((CheckBox) v).isChecked());
+                    checkInterface.checkGroup(groupPosition, ((CheckBox) v).isChecked());
+                }
+            });
+            groupViewHolder.storeCheckBox.setChecked(group.isChoosed());
+
+
+            /**【文字指的是组的按钮的文字】
+             * 当我们按下ActionBar的 "编辑"按钮， 应该把所有组的文字显示"编辑",并且设置按钮为不可见
+             * 当我们完成编辑后，再把组的编辑按钮设置为可见
+             * 不懂，请自己操作淘宝，观察一遍
+             */
+            if(group.isActionBarEditor()){
+                group.setEditor(false);
+                groupViewHolder.storeEdit.setVisibility(View.GONE);
+                flag = false;
+            }else{
+                flag = true;
+                groupViewHolder.storeEdit.setVisibility(View.VISIBLE);
             }
-        });
-        groupViewHolder.storeCheckBox.setChecked(group.isChoosed());
 
-        /**【文字指的是组的按钮的文字】
-         * 当我们按下ActionBar的 "编辑"按钮， 应该把所有组的文字显示"编辑",并且设置按钮为不可见
-         * 当我们完成编辑后，再把组的编辑按钮设置为可见
-         * 不懂，请自己操作淘宝，观察一遍
-         */
-        if(group.isActionBarEditor()){
-            group.setEditor(false);
-            groupViewHolder.storeEdit.setVisibility(View.GONE);
-            flag=false;
-        }else{
-            flag=true;
+            /**
+             * 思路:当我们按下组的"编辑"按钮后，组处于编辑状态，文字显示"完成"
+             * 当我们点击“完成”按钮后，文字显示"编辑“,组处于未编辑状态
+             */
+            if (group.isEditor()) {
+                groupViewHolder.storeEdit.setText("完成");
+            } else {
+                groupViewHolder.storeEdit.setText("编辑");
+            }
             groupViewHolder.storeEdit.setVisibility(View.VISIBLE);
+            groupViewHolder.storeCheckBox.setVisibility(View.VISIBLE);
+            groupViewHolder.storeEdit.setOnClickListener(new GroupViewClick(group, groupPosition, groupViewHolder.storeEdit));
+        }else {
+            groupViewHolder.storeName.setText("失效商品");
+            groupViewHolder.storeCheckBox.setVisibility(View.INVISIBLE);
+            groupViewHolder.storeEdit.setVisibility(View.GONE);
         }
 
-        /**
-         * 思路:当我们按下组的"编辑"按钮后，组处于编辑状态，文字显示"完成"
-         * 当我们点击“完成”按钮后，文字显示"编辑“,组处于未编辑状态
-         */
-        if (group.isEditor()) {
-            groupViewHolder.storeEdit.setText("完成");
-        } else {
-            groupViewHolder.storeEdit.setText("编辑");
-        }
 
-        groupViewHolder.storeEdit.setOnClickListener(new GroupViewClick(group, groupPosition, groupViewHolder.storeEdit));
         return convertView;
     }
 
@@ -174,92 +178,126 @@ public class ShopCatAdapter extends BaseExpandableListAdapter {
             childViewHolder = (ChildViewHolder) convertView.getTag();
         }
 
-        /*
+        if(groupPosition!=groups.size()-1){
+             /*
          * 根据组的编辑按钮的可见与不可见，去判断是组对下辖的子元素编辑  还是ActionBar对组的下瞎元素的编辑
          * 如果组的编辑按钮可见，那么肯定是组对自己下辖元素的编辑
          * 如果组的编辑按钮不可见，那么肯定是ActionBar对组下辖元素的编辑
          */
-        if(flag){
-            if (groups.get(groupPosition).isEditor()) {
-                childViewHolder.editGoodsData.setVisibility(View.VISIBLE);
-                childViewHolder.goodsData.setVisibility(View.GONE);
-            } else {
-                childViewHolder.goodsData.setVisibility(View.VISIBLE);
-                childViewHolder.editGoodsData.setVisibility(View.GONE);
-            }
-        }else{
-            if(groups.get(groupPosition).isActionBarEditor()){
-                childViewHolder.editGoodsData.setVisibility(View.VISIBLE);
-                childViewHolder.goodsData.setVisibility(View.GONE);
+            if(flag){
+                if (groups.get(groupPosition).isEditor()) {
+                    childViewHolder.editGoodsData.setVisibility(View.VISIBLE);
+                    childViewHolder.goodsData.setVisibility(View.GONE);
+                } else {
+                    childViewHolder.goodsData.setVisibility(View.VISIBLE);
+                    childViewHolder.editGoodsData.setVisibility(View.GONE);
+                }
             }else{
-                childViewHolder.goodsData.setVisibility(View.VISIBLE);
-                childViewHolder.editGoodsData.setVisibility(View.GONE);
+                if(groups.get(groupPosition).isActionBarEditor()){
+                    childViewHolder.editGoodsData.setVisibility(View.VISIBLE);
+                    childViewHolder.goodsData.setVisibility(View.GONE);
+                }else{
+                    childViewHolder.goodsData.setVisibility(View.VISIBLE);
+                    childViewHolder.editGoodsData.setVisibility(View.GONE);
+                }
             }
-        }
 
-        final GoodsInfo child = (GoodsInfo) getChild(groupPosition, childPosition);
-        if (child != null) {
-            childViewHolder.goodsName.setText(child.getDesc());
-            childViewHolder.goodsPrice.setText("￥" + child.getPrice() + "");
-            childViewHolder.goodsNum.setText(String.valueOf(child.getCount()));
-            childViewHolder.goodsImage.setImageResource(R.drawable.bg_lake_min);
-            childViewHolder.goods_size.setText("门票:" + child.getColor() + ",类型:" + child.getSize());
-            //设置打折前的原价
-            SpannableString spannableString = new SpannableString("￥" + child.getPrime_price() + "");
-            StrikethroughSpan span = new StrikethroughSpan();
-            spannableString.setSpan(span,0,spannableString.length()-1+1, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
-            //避免无限次的append
-            if (childViewHolder.goodsPrimePrice.length() > 0) {
-                childViewHolder.goodsPrimePrice.setText("");
+            final GoodsInfo child = (GoodsInfo) getChild(groupPosition, childPosition);
+            if (child != null) {
+                childViewHolder.goodsName.setText(child.getDesc());
+                childViewHolder.goodsPrice.setText("￥" + child.getPrice() + "");
+                childViewHolder.goodsNum.setText(String.valueOf(child.getCount()));
+                childViewHolder.goodsImage.setImageResource(R.drawable.bg_lake_min);
+                childViewHolder.goods_size.setText("门票:" + child.getColor() + ",类型:" + child.getSize());
+                //设置打折前的原价
+                SpannableString spannableString = new SpannableString("￥" + child.getPrime_price() + "");
+                StrikethroughSpan span = new StrikethroughSpan();
+                spannableString.setSpan(span,0,spannableString.length()-1+1, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+                //避免无限次的append
+                if (childViewHolder.goodsPrimePrice.length() > 0) {
+                    childViewHolder.goodsPrimePrice.setText("");
+                }
+                childViewHolder.goodsPrimePrice.setText(spannableString);
+                childViewHolder.goodsBuyNum.setText("x" + child.getCount() + "");
+                childViewHolder.singleCheckBox.setChecked(child.isChoosed());
+                childViewHolder.singleCheckBox.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        child.setChoosed(((CheckBox) v).isChecked());
+                        childViewHolder.singleCheckBox.setChecked(((CheckBox) v).isChecked());
+                        checkInterface.checkChild(groupPosition, childPosition, ((CheckBox) v).isChecked());
+                    }
+                });
+                childViewHolder.increaseGoodsNum.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        modifyCountInterface.doIncrease(groupPosition, childPosition, childViewHolder.goodsNum, childViewHolder.singleCheckBox.isChecked());
+                    }
+                });
+                childViewHolder.reduceGoodsNum.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        modifyCountInterface.doDecrease(groupPosition, childPosition, childViewHolder.goodsNum, childViewHolder.singleCheckBox.isChecked());
+                    }
+                });
+                childViewHolder.goodsNum.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+
+                    }
+                });
             }
-            childViewHolder.goodsPrimePrice.setText(spannableString);
-            childViewHolder.goodsBuyNum.setText("x" + child.getCount() + "");
-            childViewHolder.singleCheckBox.setChecked(child.isChoosed());
-            childViewHolder.singleCheckBox.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    child.setChoosed(((CheckBox) v).isChecked());
-                    childViewHolder.singleCheckBox.setChecked(((CheckBox) v).isChecked());
-                    checkInterface.checkChild(groupPosition, childPosition, ((CheckBox) v).isChecked());
-                }
-            });
-            childViewHolder.increaseGoodsNum.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    modifyCountInterface.doIncrease(groupPosition, childPosition, childViewHolder.goodsNum, childViewHolder.singleCheckBox.isChecked());
-                }
-            });
-            childViewHolder.reduceGoodsNum.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    modifyCountInterface.doDecrease(groupPosition, childPosition, childViewHolder.goodsNum, childViewHolder.singleCheckBox.isChecked());
-                }
-            });
-            childViewHolder.goodsNum.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-
-                }
-            });
+            childViewHolder.singleCheckBox.setVisibility(View.VISIBLE);
+        }else {
+            childViewHolder.singleCheckBox.setVisibility(View.INVISIBLE);
         }
         return convertView;
     }
 
 
+
+    @Override
+    public boolean isChildSelectable(int groupPosition, int childPosition) {
+        return false;
+    }
+
+
+    public GroupEditorListener getGroupEditorListener() {
+        return groupEditorListener;
+    }
+
     public void setGroupEditorListener(GroupEditorListener groupEditorListener) {
         this.groupEditorListener = groupEditorListener;
+    }
+
+    public CheckInterface getCheckInterface() {
+        return checkInterface;
     }
 
     public void setCheckInterface(CheckInterface checkInterface) {
         this.checkInterface = checkInterface;
     }
 
+    public ModifyCountInterface getModifyCountInterface() {
+        return modifyCountInterface;
+    }
 
     public void setModifyCountInterface(ModifyCountInterface modifyCountInterface) {
         this.modifyCountInterface = modifyCountInterface;
     }
 
 
+    static class GroupViewHolder {
+        CheckBox storeCheckBox;
+        TextView storeName;
+        TextView storeEdit;
+
+        GroupViewHolder(View view) {
+            storeCheckBox = view.findViewById(R.id.cb_store_checkBox);
+            storeName = view.findViewById(R.id.tv_store_name);
+            storeEdit = view.findViewById(R.id.btn_store_edit);
+        }
+    }
 
     /**
      * 店铺的复选框
@@ -347,20 +385,6 @@ public class ShopCatAdapter extends BaseExpandableListAdapter {
         }
     }
 
-
-    static class GroupViewHolder {
-        CheckBox storeCheckBox;
-        TextView storeName;
-        TextView storeEdit;
-        View mViewLine;
-
-        GroupViewHolder(View view) {
-            storeCheckBox = view.findViewById(R.id.cb_store_checkBox);
-            storeName = view.findViewById(R.id.tv_store_name);
-            storeEdit = view.findViewById(R.id.btn_store_edit);
-            mViewLine = view.findViewById(R.id.view_line);
-        }
-    }
 
     static class ChildViewHolder {
         CheckBox singleCheckBox;

@@ -46,7 +46,7 @@
                         android:gravity="center"
                         android:text="----------猜你喜欢----------"/>
 
-                    <include layout="@layout/footer_shop_more"/>
+                    <include layout="@layout/footer_shop_more1"/>
                 </LinearLayout>
 
             </ScrollView>
@@ -73,7 +73,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:visibility="gone">
-        <include layout="@layout/footer_shop_more"/>
+        <include layout="@layout/footer_shop_more1"/>
     </LinearLayout>
 
     <View

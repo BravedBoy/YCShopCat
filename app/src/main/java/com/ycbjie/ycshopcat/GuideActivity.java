@@ -35,5 +35,11 @@ public class GuideActivity extends AppCompatActivity {
                 startActivity(new Intent(GuideActivity.this,ThirdActivity.class));
             }
         });
+        findViewById(R.id.tv_4).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(GuideActivity.this,FourActivity.class));
+            }
+        });
     }
 }

@@ -1,6 +1,8 @@
 package com.ycbjie.ycshopcat;
 
 import android.content.Context;
+import android.content.DialogInterface;
+import android.support.v7.app.AlertDialog;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.StrikethroughSpan;
@@ -24,7 +26,7 @@ import java.util.Map;
 /**
  * 购物车适配器
  */
-public class ShopCat2Adapter extends BaseExpandableListAdapter {
+public class ShopCat3Adapter extends BaseExpandableListAdapter {
 
     private List<StoreInfo> groups;
     //这个String对应着StoreInfo的Id，也就是店铺的Id
@@ -39,7 +41,7 @@ public class ShopCat2Adapter extends BaseExpandableListAdapter {
     private boolean flag = true;
 
 
-    ShopCat2Adapter(List<StoreInfo> groups, Map<String, List<GoodsInfo>> children, Context mContext) {
+    ShopCat3Adapter(List<StoreInfo> groups, Map<String, List<GoodsInfo>> children, Context mContext) {
         this.groups = groups;
         this.children = children;
         this.mContext = mContext;
@@ -162,16 +164,16 @@ public class ShopCat2Adapter extends BaseExpandableListAdapter {
             groupViewHolder.storeCheckBox.setVisibility(View.INVISIBLE);
             groupViewHolder.storeEdit.setVisibility(View.GONE);
         }
-
-
         return convertView;
     }
+
+
 
     @Override
     public View getChildView(final int groupPosition, final int childPosition, boolean isLastChild, View convertView, ViewGroup parent) {
         final ChildViewHolder childViewHolder;
         if (convertView == null) {
-            convertView = LayoutInflater.from(mContext).inflate(R.layout.item_shop_cat_product, parent,false);
+            convertView = LayoutInflater.from(mContext).inflate(R.layout.item_shop_cat_product3, parent,false);
             childViewHolder = new ChildViewHolder(convertView);
             convertView.setTag(childViewHolder);
         } else {
@@ -246,6 +248,22 @@ public class ShopCat2Adapter extends BaseExpandableListAdapter {
 
                     }
                 });
+                childViewHolder.delGoods.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        new AlertDialog.Builder(mContext)
+                                .setMessage("确定要删除该商品吗")
+                                .setNegativeButton("取消",null)
+                                .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+                                        modifyCountInterface.childDelete(groupPosition,childPosition);
+                                    }
+                                })
+                                .create()
+                                .show();
+                    }
+                });
             }
             childViewHolder.singleCheckBox.setVisibility(View.VISIBLE);
         }else {
@@ -284,6 +302,21 @@ public class ShopCat2Adapter extends BaseExpandableListAdapter {
 
     public void setModifyCountInterface(ModifyCountInterface modifyCountInterface) {
         this.modifyCountInterface = modifyCountInterface;
+    }
+
+
+    static class GroupViewHolder {
+        CheckBox storeCheckBox;
+        TextView storeName;
+        TextView storeEdit;
+        View mViewLine;
+
+        GroupViewHolder(View view) {
+            storeCheckBox = view.findViewById(R.id.cb_store_checkBox);
+            storeName = view.findViewById(R.id.tv_store_name);
+            storeEdit = view.findViewById(R.id.btn_store_edit);
+            mViewLine = view.findViewById(R.id.view_line);
+        }
     }
 
     /**
@@ -373,22 +406,6 @@ public class ShopCat2Adapter extends BaseExpandableListAdapter {
     }
 
 
-
-    static class GroupViewHolder {
-        CheckBox storeCheckBox;
-        TextView storeName;
-        TextView storeEdit;
-        View mViewLine;
-
-        GroupViewHolder(View view) {
-            storeCheckBox = view.findViewById(R.id.cb_store_checkBox);
-            storeName = view.findViewById(R.id.tv_store_name);
-            storeEdit = view.findViewById(R.id.btn_store_edit);
-            mViewLine = view.findViewById(R.id.view_line);
-        }
-    }
-
-
     static class ChildViewHolder {
         CheckBox singleCheckBox;
         ImageView goodsImage;
@@ -403,6 +420,7 @@ public class ShopCat2Adapter extends BaseExpandableListAdapter {
         TextView increaseGoodsNum;
         TextView goodsSize;
         LinearLayout editGoodsData;
+        TextView delGoods;
 
         ChildViewHolder(View view) {
             singleCheckBox = view.findViewById(R.id.cb_single_checkBox);
@@ -418,6 +436,7 @@ public class ShopCat2Adapter extends BaseExpandableListAdapter {
             reduceGoodsNum = view.findViewById(R.id.tv_reduce_goodsNum);
             increaseGoodsNum = view.findViewById(R.id.tv_increase_goods_Num);
             goodsSize = view.findViewById(R.id.tv_goodsSize);
+            delGoods = view.findViewById(R.id.del_goods);
         }
     }
 }

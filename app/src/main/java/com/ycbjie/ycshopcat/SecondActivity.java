@@ -103,7 +103,13 @@ public class SecondActivity extends AppCompatActivity implements View.OnClickLis
         groups = new ArrayList<>();
         childs = new HashMap<>();
         for (int i = 0; i < 5; i++) {
-            groups.add(new StoreInfo(i + "", "杨充：" + (i + 1) + "号当铺"));
+            //设置最后一组失效
+            if(i==4){
+                groups.add(new StoreInfo(i + "", "杨充：" + (i + 1) + "号当铺",true));
+            }else {
+                groups.add(new StoreInfo(i + "", "杨充：" + (i + 1) + "号当铺",false));
+            }
+
             List<GoodsInfo> goods = new ArrayList<>();
             for (int j = 0; j <= i; j++) {
                 int[] img = {R.drawable.bg_autumn_tree_min,
@@ -148,10 +154,12 @@ public class SecondActivity extends AppCompatActivity implements View.OnClickLis
     private void doCheckAll() {
         for (int i = 0; i < groups.size(); i++) {
             StoreInfo group = groups.get(i);
-            group.setChoosed(mCbAllCheckBox.isChecked());
-            List<GoodsInfo> child = childs.get(group.getId());
-            for (int j = 0; j < child.size(); j++) {
-                child.get(j).setChoosed(mCbAllCheckBox.isChecked());
+            if(!group.isLose()){
+                group.setChoosed(mCbAllCheckBox.isChecked());
+                List<GoodsInfo> child = childs.get(group.getId());
+                for (int j = 0; j < child.size(); j++) {
+                    child.get(j).setChoosed(mCbAllCheckBox.isChecked());
+                }
             }
         }
         adapter.notifyDataSetChanged();
@@ -320,33 +328,33 @@ public class SecondActivity extends AppCompatActivity implements View.OnClickLis
      */
     private boolean isCheckAll() {
         for (StoreInfo group : groups) {
-            if (!group.isChoosed()) {
+            if (!group.isLose() && !group.isChoosed()) {
                 return false;
             }
         }
         return true;
     }
 
-    /**
-     * 计算商品总价格，操作步骤
-     * 1.先清空全局计价,计数
-     * 2.遍历所有的子元素，只要是被选中的，就进行相关的计算操作
-     * 3.给textView填充数据
-     */
-    private double mTotalPrice = 0.00;
-    private int mTotalCount = 0;
+    /*
+       计算商品总价格，操作步骤
+       1.先清空全局计价,计数
+       2.遍历所有的子元素，只要是被选中的，就进行相关的计算操作
+       3.给textView填充数据
+      */
     @SuppressLint("SetTextI18n")
     private void calulate() {
-        mTotalPrice = 0.00;
-        mTotalCount = 0;
+        double mTotalPrice = 0.00;
+        int mTotalCount = 0;
         for (int i = 0; i < groups.size(); i++) {
             StoreInfo group = groups.get(i);
-            List<GoodsInfo> child = childs.get(group.getId());
-            for (int j = 0; j < child.size(); j++) {
-                GoodsInfo good = child.get(j);
-                if (good.isChoosed() ) {
-                    mTotalCount++;
-                    mTotalPrice += good.getPrice() * good.getCount();
+            if(!group.isLose()){
+                List<GoodsInfo> child = childs.get(group.getId());
+                for (int j = 0; j < child.size(); j++) {
+                    GoodsInfo good = child.get(j);
+                    if (good.isChoosed()) {
+                        mTotalCount++;
+                        mTotalPrice += good.getPrice() * good.getCount();
+                    }
                 }
             }
         }
@@ -367,10 +375,12 @@ public class SecondActivity extends AppCompatActivity implements View.OnClickLis
         int count = 0;
         for (int i = 0; i < groups.size(); i++) {
             StoreInfo group = groups.get(i);
-            group.setChoosed(mCbAllCheckBox.isChecked());
-            List<GoodsInfo> Childs = childs.get(group.getId());
-            for (GoodsInfo childs : Childs) {
-                count++;
+            if(!group.isLose()){
+                group.setChoosed(mCbAllCheckBox.isChecked());
+                List<GoodsInfo> Childs = childs.get(group.getId());
+                for (GoodsInfo childs : Childs) {
+                    count++;
+                }
             }
         }
         //购物车已经清空

@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-public class FiveActivity extends AppCompatActivity implements View.OnClickListener {
+public class FourActivity extends AppCompatActivity implements View.OnClickListener {
 
     private Toolbar mToolbar;
     private TextView mToolbarTitle;
@@ -56,7 +56,7 @@ public class FiveActivity extends AppCompatActivity implements View.OnClickListe
      * false就是编辑，true就是完成
      */
     private boolean flag = false;
-    private ShopCatAdapter adapter;
+    private ShopCat1Adapter adapter;
     private ShopMoreAdapter moreAdapter;
     private List<ShopBean> shopBeans;
 
@@ -109,7 +109,7 @@ public class FiveActivity extends AppCompatActivity implements View.OnClickListe
         groups = new ArrayList<>();
         childs = new HashMap<>();
         for (int i = 0; i < 5; i++) {
-            groups.add(new StoreInfo(i + "", "杨充：" + (i + 1) + "号当铺"));
+            groups.add(new StoreInfo(i + "", "杨充：" + (i + 1) + "号当铺",false));
             List<GoodsInfo> goods = new ArrayList<>();
             for (int j = 0; j <= i; j++) {
                 int[] img = {R.drawable.bg_autumn_tree_min,
@@ -190,9 +190,9 @@ public class FiveActivity extends AppCompatActivity implements View.OnClickListe
 
 
     private void initListView() {
-        adapter = new ShopCatAdapter(groups, childs, this);
+        adapter = new ShopCat1Adapter(groups, childs, this);
         //关键步骤1：设置复选框的接口
-        adapter.setCheckInterface(new ShopCatAdapter.CheckInterface() {
+        adapter.setCheckInterface(new ShopCat1Adapter.CheckInterface() {
             /**
              * @param groupPosition 组元素的位置
              * @param isChecked     组元素的选中与否
@@ -214,7 +214,7 @@ public class FiveActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
         //关键步骤2:设置增删减的接口
-        adapter.setModifyCountInterface(new ShopCatAdapter.ModifyCountInterface() {
+        adapter.setModifyCountInterface(new ShopCat1Adapter.ModifyCountInterface() {
             @Override
             public void doIncrease(int groupPosition, int childPosition, View showCountView, boolean isChecked) {
 
@@ -236,7 +236,7 @@ public class FiveActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
         //关键步骤3:监听组列表的编辑状态
-        adapter.setGroupEditorListener(new ShopCatAdapter.GroupEditorListener() {
+        adapter.setGroupEditorListener(new ShopCat1Adapter.GroupEditorListener() {
             @Override
             public void groupEditor(int groupPosition) {
 
@@ -292,7 +292,7 @@ public class FiveActivity extends AppCompatActivity implements View.OnClickListe
      */
     @SuppressLint("ClickableViewAccessibility")
     private View getFootRecommendView() {
-        View view = View.inflate(this, R.layout.footer_shop_more, null);
+        View view = View.inflate(this, R.layout.footer_shop_more2, null);
         final VerticalRecyclerView recyclerView = view.findViewById(R.id.recyclerView);
         moreAdapter = new ShopMoreAdapter(this);
         recyclerView.setAdapter(moreAdapter);
