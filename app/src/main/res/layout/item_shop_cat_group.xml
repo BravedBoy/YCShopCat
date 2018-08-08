@@ -6,8 +6,10 @@
     android:layout_height="50dp">
 
     <View
+        android:id="@+id/view_line"
+        android:visibility="gone"
         android:layout_width="match_parent"
-        android:layout_height="1px"
+        android:layout_height="10dp"
         android:layout_alignParentTop="true"
         android:background="@color/color_ffe6e6e6"/>
 

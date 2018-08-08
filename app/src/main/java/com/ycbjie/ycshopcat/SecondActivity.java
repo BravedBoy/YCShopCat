@@ -1,11 +1,12 @@
 package com.ycbjie.ycshopcat;
 
 import android.annotation.SuppressLint;
+import android.os.Bundle;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.AbsListView;
 import android.widget.CheckBox;
@@ -14,6 +15,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.ycbjie.ycshopcat.bean.GoodsInfo;
+import com.ycbjie.ycshopcat.bean.ShopBean;
 import com.ycbjie.ycshopcat.bean.StoreInfo;
 
 import java.util.ArrayList;
@@ -22,7 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+public class SecondActivity extends AppCompatActivity implements View.OnClickListener {
 
     private Toolbar mToolbar;
     private TextView mToolbarTitle;
@@ -51,7 +53,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
      * false就是编辑，true就是完成
      */
     private boolean flag = false;
-    private ShopCatAdapter adapter;
+    private ShopCat2Adapter adapter;
+    private ShopMoreAdapter moreAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -110,7 +113,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         R.drawable.bg_magnolia_trees_min,
                         R.drawable.bg_autumn_tree_min};
                 //i-j 就是商品的id， 对应着第几个店铺的第几个商品，1-1 就是第一个店铺的第一个商品
-                goods.add(new GoodsInfo(i + "-" + j, "商品", groups.get(i).getName() + "的第" + (j + 1) + "个商品", 255.00 + new Random().nextInt(1500), 1555 + new Random().nextInt(3000), "第一排", "出头天者", img[j], new Random().nextInt(100)));
+                goods.add(new GoodsInfo(i + "-" + j, "商品",
+                        groups.get(i).getName() + "的第" + (j + 1) + "个商品",
+                        255.00 + new Random().nextInt(1500),
+                        1555 + new Random().nextInt(3000),
+                        "第一排",
+                        "出头天者",
+                        img[j], new Random().nextInt(100)));
             }
             childs.put(groups.get(i).getId(), goods);
         }
@@ -175,9 +184,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 
     private void initListView() {
-        adapter = new ShopCatAdapter(groups, childs, this);
+        adapter = new ShopCat2Adapter(groups, childs, this);
         //关键步骤1：设置复选框的接口
-        adapter.setCheckInterface(new ShopCatAdapter.CheckInterface() {
+        adapter.setCheckInterface(new ShopCat2Adapter.CheckInterface() {
             /**
              * @param groupPosition 组元素的位置
              * @param isChecked     组元素的选中与否
@@ -199,7 +208,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
         //关键步骤2:设置增删减的接口
-        adapter.setModifyCountInterface(new ShopCatAdapter.ModifyCountInterface() {
+        adapter.setModifyCountInterface(new ShopCat2Adapter.ModifyCountInterface() {
             @Override
             public void doIncrease(int groupPosition, int childPosition, View showCountView, boolean isChecked) {
 
@@ -221,7 +230,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             }
         });
         //关键步骤3:监听组列表的编辑状态
-        adapter.setGroupEditorListener(new ShopCatAdapter.GroupEditorListener() {
+        adapter.setGroupEditorListener(new ShopCat2Adapter.GroupEditorListener() {
             @Override
             public void groupEditor(int groupPosition) {
 
@@ -335,7 +344,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             List<GoodsInfo> child = childs.get(group.getId());
             for (int j = 0; j < child.size(); j++) {
                 GoodsInfo good = child.get(j);
-                if (good.isChoosed()) {
+                if (good.isChoosed() ) {
                     mTotalCount++;
                     mTotalPrice += good.getPrice() * good.getCount();
                 }
@@ -353,6 +362,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     /**
      * 设置购物车的数量
      */
+    @SuppressLint("SetTextI18n")
     private void setCartNum() {
         int count = 0;
         for (int i = 0; i < groups.size(); i++) {
@@ -371,9 +381,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+
     private void clearCart() {
         mToolbarTitle.setText("购物车(0)");
         mTvTitleRight.setVisibility(View.GONE);
     }
+
+
 
 }
